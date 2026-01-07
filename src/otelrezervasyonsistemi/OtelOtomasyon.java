@@ -1,6 +1,9 @@
 
 package otelrezervasyonsistemi;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Scanner;
 
 
@@ -18,7 +21,10 @@ public class OtelOtomasyon {
     static int kayitSayisi = 0;
     
     
-    static void rezervasyonOlustur(){
+    static void rezervasyonOlustur() throws IOException{
+        
+        System.out.print("\nMerhaba hoşgeldiniz! Kaç günlük rezervasyon yaptırmak istiyorsunuz: ");
+        int gun = input.nextInt();
         
         System.out.println("Rezervasyon yapabileceğiniz boş odalar şunlarıdır: ");
         for (int i = 0; i < odaNumaralari.length; i++) {
@@ -44,7 +50,7 @@ public class OtelOtomasyon {
             System.out.println("Bu oda dolu!");
             return;
         }    
-        System.out.print("İsminizi giriniz: ");
+        System.out.print("\nİsminizi giriniz: ");
         isimler[kayitSayisi] = input.nextLine();
         
         System.out.print("Soyadınızı giriniz: ");
@@ -61,15 +67,28 @@ public class OtelOtomasyon {
         
         odaNumaralari[kayitSayisi] = secilenOda;
         odaKontrol[secilenOda -1] = true;
-        kayitSayisi++;
         
-        System.out.println("\nRezervasyon oluşturuldu!");
+        int toplamTutar = gun * 1000;
+        System.out.println("\nToplam Tutar: " + toplamTutar + " TL");
+        System.out.println("Rezervasyonunuz oluşturuldu!.İyi tatiller dileriz..");
+        
+        FileWriter yazici = new FileWriter("data\\kayitlar.txt", true);
+        
+        yazici.write("Oda No: " + secilenOda + 
+                     " | Ad Soyad: " + isimler[kayitSayisi] + " " + soyAdlar[kayitSayisi] + 
+                     " | TC: " + tcNumaralari[kayitSayisi] + 
+                     " | Tel: " + telNumaralari[kayitSayisi] + 
+                     " | Doğum Yılı: " + dogumYillari[kayitSayisi] + 
+                     " | Rezervasyon süresi: " + gun + " gün" + "\n");
+        yazici.close();
+             
+        kayitSayisi++;        
         System.out.println("--------------------");
     }
     
     static void rezervasyonIptal(){
         
-        System.out.print("İptal etmek istediğiniz odanın numarasını giriniz: ");
+        System.out.print("\nİptal etmek istediğiniz odanın numarasını giriniz: ");
         int iptalOda = input.nextInt();
         
         if(odaKontrol[iptalOda -1] == false){
@@ -96,7 +115,7 @@ public class OtelOtomasyon {
     
     static void rezervasyonGuncelle(){
         
-        System.out.print("Güncellemek istediğiniz odanın numarasını giriniz: ");
+        System.out.print("\nGüncellemek istediğiniz odanın numarasını giriniz: ");
         int guncelOda = input.nextInt();
         input.nextLine();
         
@@ -104,28 +123,14 @@ public class OtelOtomasyon {
             System.out.println("Oda boş durumda.Güncellenecek rezervasyon bulunamadı.");
         }
         else{
-            for (int i = 0; i < kayitSayisi; i++) {
-                
-                if(odaNumaralari[i] == guncelOda){
-                    System.out.print("Yeni isminizi giriniz: ");
-                    isimler[i] = input.nextLine();
-                    
-                    System.out.print("Yeni soyadınızı giriniz: ");
-                    soyAdlar[i] = input.nextLine();
-        
-                    System.out.print("Yeni TC kimlik numaranızı giriniz: ");
-                    tcNumaralari[i] = input.nextLong();
-
-                    System.out.print("Yeni telefon numaranızı giriniz: ");
-                    telNumaralari[i] = input.nextLong();
-
-                    System.out.print("Yeni doğum yılınızı giriniz: ");
-                    dogumYillari[i] = input.nextInt();
-                    
-                    break;
-                }
-            }
-            System.out.println("\nRezervasyon güncellendi.");
+            System.out.print("Rezervasyonunuzu kaç gün uzatmak istersiniz: ");
+            int gunUzatma = input.nextInt();
+            
+            int uzatmaUcreti = gunUzatma * 1000;
+            System.out.println("\nRezervasyonunuz " + gunUzatma + " gün uzatılmıştır.");
+            System.out.println("Toplam Tutar: " + uzatmaUcreti + " TL'dir.");
+            
+            System.out.println("\nRezervasyonunuz güncellendi.");
             System.out.println("--------------------");
         }
     }
@@ -182,23 +187,49 @@ public class OtelOtomasyon {
         System.out.println("--------------------");
     }
     
-    static void rezervasyonListele(){
+    static void rezervasyonListele() throws IOException{
         
-        for (int i = 0; i < kayitSayisi; i++) {
-            
-            if(odaNumaralari[i] != 0){
-                System.out.println("\n" + odaNumaralari[i] + ". oda sahibinin ismi: " + isimler[i]);
-                System.out.println(odaNumaralari[i] + ". oda sahibinin soyadı: " + soyAdlar[i]);
-                System.out.println(odaNumaralari[i] + ". oda sahibinin TC numarası: " + tcNumaralari[i]);
-                System.out.println(odaNumaralari[i] + ". oda sahibinin telefon numarası: " + telNumaralari[i]);
-                System.out.println(odaNumaralari[i] + ". oda sahibinin doğum yılı: " + dogumYillari[i]);
-            }
+        File dosya = new File("data\\kayitlar.txt");
+        Scanner okuyucu = new Scanner(dosya);
+
+        while(okuyucu.hasNextLine()){
+            String kayit = okuyucu.nextLine();
+            System.out.println(kayit);
         }
+        okuyucu.close();
+                
         System.out.println("\nTüm rezervasyonlar listelendi.");
         System.out.println("--------------------");
     }   
     
-    public static void main(String[] args) {
+    static void sistemiYukle() throws IOException{
+        
+        File sistem = new File("data\\kayitlar.txt");
+        
+        if(sistem.exists()){
+            
+            Scanner okuyucu = new Scanner(sistem);
+            
+            while(okuyucu.hasNext()){
+                
+                if(okuyucu.hasNextInt()){
+                int oda = okuyucu.nextInt();
+                
+                odaKontrol[oda - 1] = true;
+                odaNumaralari[kayitSayisi] = oda;
+                okuyucu.nextLine();
+                }
+                else{
+                    okuyucu.next();
+                }
+            }
+            okuyucu.close();
+        }
+    }
+    
+    public static void main(String[] args) throws IOException{
+        
+        sistemiYukle();
         
         int girilen = 0;
         
@@ -260,5 +291,4 @@ public class OtelOtomasyon {
             }
         }
     }
-    
 }
